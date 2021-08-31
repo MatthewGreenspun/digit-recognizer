@@ -6,15 +6,40 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+#app {
+  display: flex;
+  flex-wrap: wrap;
+}
 
 #canvas {
   width: 30%;
-  /* width: 400px;
-  height: 400px; */
   min-width: 300px;
   max-width: 500px;
   min-height: 300px;
   max-height: 500px;
   aspect-ratio: 1 / 1;
   border: 1px solid black;
+}
+
+button {
+}
+
+#data-display {
+  display: flex;
+  min-width: 300px;
+  align-items: flex-end;
+}
+.data-column-container {
+  text-align: center;
+  min-width: 25px;
+  width: 100%;
+}
+.data-column-container h2 {
+  margin: 0;
+}
+.data-column {
+  background-color: lightblue;
+}
+.data-column.prediction {
+  background-color: lightcoral !important;
 }
