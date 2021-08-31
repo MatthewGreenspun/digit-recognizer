@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, memo } from "react";
 
 interface Props {
   predict: (data: ImageData) => any;
 }
 
-const Canvas: React.FC<Props> = (props) => {
+const Canvas: React.FC<Props> = ({ predict }) => {
   const dimensions = 16;
   const mouseDownRef = useRef(false);
 
@@ -46,7 +46,7 @@ const Canvas: React.FC<Props> = (props) => {
   });
 
   return (
-    <>
+    <div id="canvas-container">
       <canvas
         id="canvas"
         ref={canvasRef}
@@ -60,8 +60,7 @@ const Canvas: React.FC<Props> = (props) => {
             const ctx = canvas?.getContext("2d");
             if (ctx && canvas) {
               ctx.lineCap = "round";
-              ctx.globalAlpha = 0.8;
-              ctx.strokeStyle = "white";
+              ctx.strokeStyle = "#ffffffff";
               ctx.lineWidth = 25;
               ctx.beginPath();
               ctx.moveTo(relativeX, relativeY);
@@ -72,6 +71,7 @@ const Canvas: React.FC<Props> = (props) => {
         }}
         onMouseOut={() => (mouseDownRef.current = false)}
       />
+      <br />
       <button
         onClick={() => {
           const canvas = canvasRef.current;
@@ -79,7 +79,7 @@ const Canvas: React.FC<Props> = (props) => {
           if (ctx && canvas) {
             ctx.drawImage(canvas, 0, 0, 28, 28);
             const imageData = ctx.getImageData(0, 0, 28, 28);
-            props.predict(imageData);
+            predict(imageData);
           }
         }}
       >
@@ -99,8 +99,9 @@ const Canvas: React.FC<Props> = (props) => {
       >
         Clear
       </button>
-    </>
+    </div>
   );
 };
 
-export default Canvas;
+const MemoizedCanvas = memo(Canvas);
+export default MemoizedCanvas;

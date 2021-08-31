@@ -1,7 +1,10 @@
+import PredictionDisplay from "./components/PredictionDisplay";
 import Canvas from "./components/Canvas";
+import { useState, useCallback } from "react";
 import * as tf from "@tensorflow/tfjs";
 
 function App() {
+  const [modelOutput, setModelOutput] = useState(new Array<number>(10).fill(0));
   function formatImageData(data: ImageData) {
     const { data: imageData } = data;
     const newPixelData = new Float32Array(28 * 28);
@@ -12,7 +15,7 @@ function App() {
     }
     return newPixelData;
   }
-  async function predict(data: ImageData) {
+  const predict = useCallback(async (data: ImageData) => {
     const model = await tf.loadLayersModel("/model.json");
     tf.tidy(() => {
       let convertedImage = tf.tensor2d(formatImageData(data), [1, 784]);
@@ -21,12 +24,16 @@ function App() {
 
       const modelOutput = model.predict(convertedImage) as tf.Tensor;
       const outputArray = Array.from(modelOutput.dataSync());
-      console.log("prediction:", outputArray.indexOf(Math.max(...outputArray)));
+      setModelOutput(outputArray);
     });
-  }
+  }, []);
   return (
-    <div className="App">
-      <Canvas predict={predict} />
+    <div id="app">
+      <h1>Digit Recognizer with Tensorflow!</h1>
+      <div className="wrap-container">
+        <Canvas predict={predict} />
+        <PredictionDisplay data={modelOutput} />
+      </div>
     </div>
   );
 }
