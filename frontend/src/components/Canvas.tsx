@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 
-function Canvas() {
+interface Props {
+  predict: (data: ImageData) => any;
+}
+
+const Canvas: React.FC<Props> = (props) => {
   const dimensions = 16;
   const mouseDownRef = useRef(false);
 
@@ -56,8 +60,9 @@ function Canvas() {
             const ctx = canvas?.getContext("2d");
             if (ctx && canvas) {
               ctx.lineCap = "round";
+              ctx.globalAlpha = 0.8;
               ctx.strokeStyle = "white";
-              ctx.lineWidth = 20;
+              ctx.lineWidth = 25;
               ctx.beginPath();
               ctx.moveTo(relativeX, relativeY);
               ctx.lineTo(relativeX, relativeY);
@@ -74,11 +79,11 @@ function Canvas() {
           if (ctx && canvas) {
             ctx.drawImage(canvas, 0, 0, 28, 28);
             const imageData = ctx.getImageData(0, 0, 28, 28);
-            console.log("put image data", imageData);
+            props.predict(imageData);
           }
         }}
       >
-        Resize
+        Predict
       </button>
       <button
         onClick={() => {
@@ -96,6 +101,6 @@ function Canvas() {
       </button>
     </>
   );
-}
+};
 
 export default Canvas;
