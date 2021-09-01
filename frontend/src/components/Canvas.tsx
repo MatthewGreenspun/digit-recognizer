@@ -9,15 +9,15 @@ const Canvas: React.FC<Props> = ({ predict }) => {
   const mouseDownRef = useRef(false);
 
   const scaleCanvas = useCallback((canvas: HTMLCanvasElement) => {
-    let dpi = window.devicePixelRatio;
-    let styleHeight = +getComputedStyle(canvas)
+    const dpr = window.devicePixelRatio;
+    const styleHeight = +getComputedStyle(canvas)
       .getPropertyValue("height")
       .slice(0, -2);
-    let styleWidth = +getComputedStyle(canvas)
+    const styleWidth = +getComputedStyle(canvas)
       .getPropertyValue("width")
       .slice(0, -2);
-    canvas.setAttribute("height", `${styleHeight * dpi}`);
-    canvas.setAttribute("width", `${styleWidth * dpi}`);
+    canvas.setAttribute("height", `${styleHeight * dpr}`);
+    canvas.setAttribute("width", `${styleWidth * dpr}`);
   }, []);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,14 +34,27 @@ const Canvas: React.FC<Props> = ({ predict }) => {
       e.preventDefault();
       mouseDownRef.current = true;
     };
+    const mouseUpHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      mouseDownRef.current = false;
+    };
+    const touchStartHandler = (e: TouchEvent) => {
+      e.preventDefault();
+      mouseDownRef.current = true;
+    };
+    const touchEndHandler = (e: TouchEvent) => {
+      e.preventDefault();
+      mouseDownRef.current = false;
+    };
     canvas?.addEventListener("mousedown", mouseDownHandler);
-    canvas?.addEventListener("mouseup", () => (mouseDownRef.current = false));
+    canvas?.addEventListener("mouseup", mouseUpHandler);
+    canvas?.addEventListener("touchstart", touchStartHandler);
+    canvas?.addEventListener("touchend", touchEndHandler);
     return () => {
       canvas?.removeEventListener("mousedown", mouseDownHandler);
-      canvas?.removeEventListener(
-        "mouseup",
-        () => (mouseDownRef.current = false)
-      );
+      canvas?.removeEventListener("mouseup", mouseUpHandler);
+      canvas?.removeEventListener("touchstart", touchStartHandler);
+      canvas?.removeEventListener("touchend", touchEndHandler);
     };
   });
 
@@ -52,9 +65,39 @@ const Canvas: React.FC<Props> = ({ predict }) => {
         ref={canvasRef}
         height={dimensions}
         width={dimensions}
+        onTouchMove={({ touches, currentTarget }) => {
+          const dpr = window.devicePixelRatio;
+          const relativeX =
+            dpr *
+            (touches[0].clientX - currentTarget.getBoundingClientRect().x);
+          const relativeY =
+            dpr *
+            (touches[0].clientY - currentTarget.getBoundingClientRect().y);
+          console.log(
+            `client x: ${touches[0].clientX}, client y: ${touches[0].clientY}`
+          );
+          console.log("client rect: ", currentTarget.getBoundingClientRect());
+          console.log(`x: ${relativeX}, y: ${relativeY}`);
+          if (mouseDownRef.current) {
+            const canvas = canvasRef.current;
+            const ctx = canvas?.getContext("2d");
+            if (ctx && canvas) {
+              ctx.lineCap = "round";
+              ctx.strokeStyle = "#ffffffff";
+              ctx.lineWidth = 25;
+              ctx.beginPath();
+              ctx.moveTo(relativeX, relativeY);
+              ctx.lineTo(relativeX + 1, relativeY + 1);
+              ctx.stroke();
+            }
+          }
+        }}
         onMouseMove={({ clientX, clientY, currentTarget }) => {
-          const relativeX = clientX - currentTarget.getBoundingClientRect().x;
-          const relativeY = clientY - currentTarget.getBoundingClientRect().y;
+          const dpr = window.devicePixelRatio;
+          const relativeX =
+            dpr * (clientX - currentTarget.getBoundingClientRect().x);
+          const relativeY =
+            dpr * (clientY - currentTarget.getBoundingClientRect().y);
           if (mouseDownRef.current) {
             const canvas = canvasRef.current;
             const ctx = canvas?.getContext("2d");
