@@ -7,17 +7,7 @@ function App() {
   const [modelOutput, setModelOutput] = useState(new Array<number>(10).fill(0));
   const modelRef = useRef<tf.LayersModel | null>(null);
 
-  function formatImageData(data: ImageData) {
-    const { data: imageData } = data;
-    const newPixelData = new Float32Array(28 * 28);
-    for (let i = 0; i < imageData.length; i += 4) {
-      const grayScaleVal =
-        (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
-      newPixelData[i / 4] = grayScaleVal / 255; //scale between 0 and 1
-    }
-    return newPixelData;
-  }
-  const predict = useCallback(async (data: ImageData) => {
+  const predict = useCallback(async (data: Float32Array) => {
     let model: tf.LayersModel;
     if (modelRef.current) model = modelRef.current;
     else {
@@ -25,8 +15,7 @@ function App() {
       modelRef.current = model;
     }
     tf.tidy(() => {
-      let convertedImage = tf.tensor2d(formatImageData(data), [1, 784]);
-      convertedImage = convertedImage.reshape([1, 28 * 28]);
+      let convertedImage = tf.tensor2d(data, [1, 784]);
       convertedImage = tf.cast(convertedImage, "float32");
 
       const modelOutput = model.predict(convertedImage) as tf.Tensor;
