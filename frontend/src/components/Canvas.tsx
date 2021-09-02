@@ -193,7 +193,7 @@ const Canvas: React.FC<Props> = ({ predict }) => {
             const ctx = canvas?.getContext("2d");
             if (ctx && canvas) {
               ctx.lineCap = "round";
-              ctx.strokeStyle = "#ffffffff";
+              ctx.strokeStyle = "white";
               ctx.lineWidth = 25;
               ctx.beginPath();
               ctx.moveTo(relativeX, relativeY);
@@ -213,7 +213,7 @@ const Canvas: React.FC<Props> = ({ predict }) => {
             const ctx = canvas?.getContext("2d");
             if (ctx && canvas) {
               ctx.lineCap = "round";
-              ctx.strokeStyle = "#ffffffff";
+              ctx.strokeStyle = "white";
               ctx.lineWidth = 20;
               ctx.beginPath();
               ctx.moveTo(relativeX, relativeY);
@@ -230,6 +230,8 @@ const Canvas: React.FC<Props> = ({ predict }) => {
           const canvas = canvasRef.current;
           const ctx = canvas?.getContext("2d");
           if (ctx && canvas) {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, 28, 28); //clear old image
             const imageBoundaries = findImageBoundaries(
               ctx.getImageData(0, 0, canvas.width, canvas.height)
             );
@@ -251,13 +253,11 @@ const Canvas: React.FC<Props> = ({ predict }) => {
             );
             const centeredImageData = centerImage(imageData);
             ctx.putImageData(f32ArrToImageData(centeredImageData), 0, 0);
-            setTimeout(() => {
-              //wait until other expensive things have been calculated
-              predict(centeredImageData);
-              ctx.globalAlpha = 0.5;
-              ctx.fillStyle = "gray";
-              ctx.fillRect(0, 0, 28, 28);
-            }, 500);
+            predict(centeredImageData);
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = "yellow";
+            ctx.fillRect(0, 0, 28, 28);
+            ctx.globalAlpha = 1;
           }
         }}
       >

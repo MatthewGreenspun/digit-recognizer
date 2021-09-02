@@ -1,5 +1,6 @@
 :root {
   --light-blue: hsl(209, 88%, 47%);
+  --lighter-blue: hsl(209, 88%, 67%);
   --dark-blue: hsl(209, 88%, 30%);
   --darker-blue: hsl(209, 88%, 20%);
   --yellow: hsl(49, 95%, 58%);
@@ -29,6 +30,7 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  margin: 0 4px;
 }
 #canvas {
   width: 30%;
@@ -74,4 +76,45 @@ button:hover {
 }
 .data-column.prediction {
   background-color: var(--yellow);
+}
+
+@keyframes progress {
+  0% {
+    left: 0;
+    width: 5%;
+    opacity: 1;
+  }
+  20% {
+    left: 0;
+    width: 50%;
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    width: 5%;
+    left: 95%;
+    opacity: 1;
+  }
+}
+
+.progress-bar {
+  position: relative;
+  height: 8px;
+  background-color: var(--light-blue);
+  border-radius: 3px;
+  width: 100%;
+  flex-grow: 1;
+}
+.progress-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  border-radius: inherit;
+  box-sizing: border-box;
+  width: 30px;
+  height: inherit;
+  background-color: var(--lighter-blue);
+  animation: progress ease-out 0.8s forwards infinite;
 }
