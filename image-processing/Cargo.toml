@@ -20,3 +20,6 @@ features = [
 
 [dependencies.js-sys]
 version = "0.3.53"
+
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false

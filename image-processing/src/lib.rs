@@ -60,13 +60,15 @@ pub fn col_is_black(data: web_sys::ImageData, col: u32) -> bool {
     let height: u32 = data.height();
     let pixel_data: Vec<u8> = data.data().0;
     
-    let mut i = col;
-    let end = (height-1)*width + col*4;
+    let mut i = col * 4;
+    let end = (height-1)*width + i;
     while i < end {
-        if (pixel_data[i as usize] + pixel_data[(i+1) as usize] + pixel_data[(i+2) as usize]) / 3 != 0 {
+        if (pixel_data[i as usize] != 0) ||
+           (pixel_data[(i+1) as usize] != 0) ||
+           (pixel_data[(i+2) as usize] != 0) {
             return false
         }
-        i += 4;
+        i += width;
     }
     true
 }
