@@ -3,6 +3,10 @@ interface ImageProcesserFunctions {
   gray_scale_image: (data: ImageData) => Float32Array;
   row_is_black: (data: ImageData, row: number) => boolean;
   col_is_black: (data: ImageData, col: number) => boolean;
+  find_image_boundaries(
+    data: ImageData,
+    square: boolean
+  ): [number, number, number, number];
 }
 
 interface ImageProcesser {
@@ -12,6 +16,10 @@ interface ImageProcesser {
   grayScaleImage: (data: ImageData) => Promise<Float32Array>;
   rowIsBlack: (data: ImageData, row: number) => Promise<boolean>;
   colIsBlack: (data: ImageData, col: number) => Promise<boolean>;
+  findImageBoundaries: (
+    data: ImageData,
+    square: boolean
+  ) => Promise<[number, number, number, number]>;
 }
 
 const imageProcesser: ImageProcesser = {
@@ -58,6 +66,17 @@ const imageProcesser: ImageProcesser = {
     else {
       const functions = await this.loadWasm();
       return functions.col_is_black(data, col);
+    }
+  },
+
+  async findImageBoundaries(data: ImageData, square: boolean) {
+    if (this.functions !== undefined)
+      return Promise.resolve(
+        this.functions.find_image_boundaries(data, square)
+      );
+    else {
+      const functions = await this.loadWasm();
+      return functions.find_image_boundaries(data, square);
     }
   },
 };

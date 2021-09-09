@@ -24,3 +24,9 @@ export function row_is_black(data: ImageData, row: number): boolean;
 * @returns {boolean}
 */
 export function col_is_black(data: ImageData, col: number): boolean;
+/**
+* @param {ImageData} data
+* @param {boolean} square
+* @returns {[number,number,number,number]}
+*/
+export function find_image_boundaries(data: ImageData, square: boolean): [number,number,number,number];

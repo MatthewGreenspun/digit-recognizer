@@ -21,6 +21,15 @@ function takeObject(idx) {
     return ret;
 }
 
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+
 const lTextDecoder = typeof TextDecoder === 'undefined' ? (0, module.require)('util').TextDecoder : TextDecoder;
 
 let cachedTextDecoder = new lTextDecoder('utf-8', { ignoreBOM: true, fatal: true });
@@ -37,15 +46,6 @@ function getUint8Memory0() {
 
 function getStringFromWasm0(ptr, len) {
     return cachedTextDecoder.decode(getUint8Memory0().subarray(ptr, ptr + len));
-}
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
 }
 /**
 * Just a test function to make sure the wasm works
@@ -67,14 +67,25 @@ export function gray_scale_image(data) {
     return takeObject(ret);
 }
 
+let stack_pointer = 32;
+
+function addBorrowedObject(obj) {
+    if (stack_pointer == 1) throw new Error('out of js stack');
+    heap[--stack_pointer] = obj;
+    return stack_pointer;
+}
 /**
 * @param {ImageData} data
 * @param {number} row
 * @returns {boolean}
 */
 export function row_is_black(data, row) {
-    var ret = wasm.row_is_black(addHeapObject(data), row);
-    return ret !== 0;
+    try {
+        var ret = wasm.row_is_black(addBorrowedObject(data), row);
+        return ret !== 0;
+    } finally {
+        heap[stack_pointer++] = undefined;
+    }
 }
 
 /**
@@ -83,8 +94,26 @@ export function row_is_black(data, row) {
 * @returns {boolean}
 */
 export function col_is_black(data, col) {
-    var ret = wasm.col_is_black(addHeapObject(data), col);
-    return ret !== 0;
+    try {
+        var ret = wasm.col_is_black(addBorrowedObject(data), col);
+        return ret !== 0;
+    } finally {
+        heap[stack_pointer++] = undefined;
+    }
+}
+
+/**
+* @param {ImageData} data
+* @param {boolean} square
+* @returns {Array<any>}
+*/
+export function find_image_boundaries(data, square) {
+    try {
+        var ret = wasm.find_image_boundaries(addBorrowedObject(data), square);
+        return takeObject(ret);
+    } finally {
+        heap[stack_pointer++] = undefined;
+    }
 }
 
 let WASM_VECTOR_LEN = 0;
@@ -163,6 +192,11 @@ export function __wbindgen_object_drop_ref(arg0) {
     takeObject(arg0);
 };
 
+export function __wbindgen_number_new(arg0) {
+    var ret = arg0;
+    return addHeapObject(ret);
+};
+
 export function __wbg_width_c11ed0f9cfab3ccc(arg0) {
     var ret = getObject(arg0).width;
     return ret;
@@ -179,6 +213,15 @@ export function __wbg_data_3b5132cf708f3fa5(arg0, arg1) {
     var len0 = WASM_VECTOR_LEN;
     getInt32Memory0()[arg0 / 4 + 1] = len0;
     getInt32Memory0()[arg0 / 4 + 0] = ptr0;
+};
+
+export function __wbg_newwithlength_6ff6040ba641d021(arg0) {
+    var ret = new Array(arg0 >>> 0);
+    return addHeapObject(ret);
+};
+
+export function __wbg_set_5fb34279c9df6c77(arg0, arg1, arg2) {
+    getObject(arg0)[arg1 >>> 0] = takeObject(arg2);
 };
 
 export function __wbg_buffer_79a3294266d4e783(arg0) {

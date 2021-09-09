@@ -1,3 +1,5 @@
+import imageProcesser from "./wasm/imageProcesser";
+
 export function scaleCanvas(canvas: HTMLCanvasElement) {
   const dpr = window.devicePixelRatio;
   const styleHeight = +getComputedStyle(canvas)
@@ -10,28 +12,37 @@ export function scaleCanvas(canvas: HTMLCanvasElement) {
   canvas.setAttribute("width", `${styleWidth * dpr}`);
 }
 
-export function rowIsBlack(data: ImageData, row: number) {
+export async function rowIsBlack(data: ImageData, row: number) {
+  if (imageProcesser.functions === undefined) await imageProcesser.loadWasm();
   const { width } = data;
-  const grayScaleImageData = grayScaleImage(data);
+  const grayScaleImageData = await imageProcesser.grayScaleImage(data);
   for (let i = row * width; i < row * width + width; i++) {
     if (grayScaleImageData[i] !== 0) return false;
   }
   return true;
 }
 
-export function colIsBlack(data: ImageData, col: number) {
+export async function colIsBlack(data: ImageData, col: number) {
+  if (imageProcesser.functions === undefined) await imageProcesser.loadWasm();
   const { width, height } = data;
-  const grayScaleImageData = grayScaleImage(data);
+  const grayScaleImageData = await imageProcesser.grayScaleImage(data);
   for (let i = col; i <= (height - 1) * width + col; i += width) {
     if (grayScaleImageData[i] !== 0) return false;
   }
   return true;
 }
-
-export function findImageBoundaries(
+export async function findImageBoundaries(
+  data: ImageData,
+  square = true
+): Promise<[x: number, y: number, width: number, height: number]> {
+  if (imageProcesser.functions === undefined) await imageProcesser.loadWasm();
+  return await imageProcesser.findImageBoundaries(data, square);
+}
+export async function findImageBoundariesJs(
   data: ImageData,
   preserveAspectRatio = true
-): [x: number, y: number, width: number, height: number] {
+): Promise<[x: number, y: number, width: number, height: number]> {
+  await imageProcesser.loadWasm();
   const { width, height } = data;
   //top, bottom, left, and right boundaries of the digit
   let top = -1;
@@ -40,16 +51,26 @@ export function findImageBoundaries(
   let right = width - 1;
 
   let i = 0;
-  while (i <= height) {
-    if (!rowIsBlack(data, i) && top === -1) top = i;
-    else if (!rowIsBlack(data, i - 1) && rowIsBlack(data, i) && top !== -1)
+  while (i < height) {
+    if (!(await imageProcesser.rowIsBlack(data, i)) && top === -1) top = i;
+    else if (
+      i !== 0 &&
+      !(await imageProcesser.rowIsBlack(data, i - 1)) &&
+      (await imageProcesser.rowIsBlack(data, i)) &&
+      top !== -1
+    )
       bottom = i;
     i++;
   }
   i = 0;
-  while (i <= width) {
-    if (!colIsBlack(data, i) && left === -1) left = i;
-    else if (!colIsBlack(data, i - 1) && colIsBlack(data, i) && left !== -1)
+  while (i < width) {
+    if (!(await imageProcesser.colIsBlack(data, i)) && left === -1) left = i;
+    else if (
+      i !== 0 &&
+      !(await imageProcesser.colIsBlack(data, i - 1)) &&
+      (await imageProcesser.colIsBlack(data, i)) &&
+      left !== -1
+    )
       right = i;
     i++;
   }
@@ -59,6 +80,7 @@ export function findImageBoundaries(
   if (preserveAspectRatio) return [left, top, squareLength, squareLength];
   else return [left, top, right - left, bottom - top];
 }
+
 export function centerImage(
   croppedImageData: Float32Array,
   boundaries: [number, number, number, number]
@@ -119,4 +141,15 @@ export function grayScaleImage(data: ImageData) {
     newPixelData[i / 4] = grayScaleVal / 255; //scale between 0 and 1
   }
   return newPixelData;
+}
+
+export async function testGrayScaleImage() {
+  const pixelData = Uint8ClampedArray.from([
+    1, 2, 3, 255, 100, 101, 102, 255, 0, 100, 200, 255, 1, 2, 3, 0,
+  ]);
+  const imageData = new ImageData(pixelData, 2, 2);
+  const wasmGrayScaleData = await imageProcesser.grayScaleImage(imageData);
+  const jsGrayScaleData = grayScaleImage(imageData);
+  console.log("wasm gray scale data:", wasmGrayScaleData);
+  console.log("js gray scale data:", jsGrayScaleData);
 }
