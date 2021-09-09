@@ -16,13 +16,13 @@ const Canvas: React.FC<Props> = ({ predict }) => {
   const mouseDownRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  function handlePredict() {
+  async function handlePredict() {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, 28, 28); //clear old image
-      const imageBoundaries = findImageBoundaries(
+      const imageBoundaries = await findImageBoundaries(
         ctx.getImageData(0, 0, canvas.width, canvas.height)
       );
       const canvas2 = document.createElement("canvas");
@@ -32,7 +32,7 @@ const Canvas: React.FC<Props> = ({ predict }) => {
       ctx2.putImageData(ctx.getImageData(...imageBoundaries), 0, 0);
       ctx.drawImage(canvas2, 0, 0, 20, 20); //images can fit in a 20/20 box
       const imageData = ctx.getImageData(0, 0, 28, 28);
-      const boundaries = findImageBoundaries(imageData, false);
+      const boundaries = await findImageBoundaries(imageData, false);
       const croppedImageData = ctx.getImageData(...boundaries);
       const centeredImageData = centerImage(
         grayScaleImage(croppedImageData),
