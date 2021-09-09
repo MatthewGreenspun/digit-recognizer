@@ -41,9 +41,11 @@ pub fn row_is_black(data: web_sys::ImageData, row: u32) -> bool {
     let pixel_data: Vec<u8> = data.data().0;
     
     let mut i = row * width;
-    let end = row * width + width;
+    let end = i + width;
     while i < end {
-        if (pixel_data[i as usize] + pixel_data[(i+1) as usize] + pixel_data[(i+2) as usize]) / 3 != 0 {
+        if (pixel_data[i as usize] != 0) ||
+           (pixel_data[(i+1) as usize] != 0) ||
+           (pixel_data[(i+2) as usize] != 0) {
             return false
         }
         i += 4;
