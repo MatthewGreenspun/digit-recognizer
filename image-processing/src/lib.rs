@@ -94,7 +94,7 @@ pub fn find_image_boundaries(data: &web_sys::ImageData, square: bool) -> js_sys:
         } else if i != 0 && !prev_row_is_black && curr_row_is_black && top != -1 {
             bottom = i;
         }
-        i = i + 1;
+        i += 1;
         prev_row_is_black = curr_row_is_black;
     }
 
@@ -107,7 +107,7 @@ pub fn find_image_boundaries(data: &web_sys::ImageData, square: bool) -> js_sys:
         } else if i != 0 && !prev_col_is_black && curr_col_is_black && left != -1 {
             right = i;
         }
-        i = i + 1;
+        i += 1;
         prev_col_is_black = curr_col_is_black;
     }
 
@@ -131,4 +131,53 @@ pub fn find_image_boundaries(data: &web_sys::ImageData, square: bool) -> js_sys:
         js_arr.set(3, JsValue::from(bottom-top));
     }
     js_arr
+}
+
+#[wasm_bindgen]
+pub fn center_image(cropped_img_data: &js_sys::Float32Array, width: u32, height: u32) -> js_sys::Float32Array {
+    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+    let final_img_width = 28;
+    let (x_avg, y_avg) = find_center_of_mass(cropped_img_data, width, height);
+    let black_rows_above = 14 - y_avg;
+    let black_cols_left = 14 - x_avg;
+    let mut centered_image_data: [f32; 784] = [0.0; 784];
+
+    let mut i = black_rows_above * final_img_width;
+    while i < black_rows_above * final_img_width + height * final_img_width {
+        let x_cord = (i - black_rows_above * final_img_width) % final_img_width;
+        let y_cord = (i - x_cord) / final_img_width;
+        if black_cols_left <= x_cord && x_cord < black_cols_left + width {
+            let corresponding_idx = (y_cord - black_rows_above) * width + x_cord - black_cols_left;
+            centered_image_data[i as usize] = cropped_img_data.get_index(corresponding_idx);
+        }
+        i += 1;
+    }
+
+    js_sys::Float32Array::from(&centered_image_data[..])
+}
+
+fn find_center_of_mass(data: &js_sys::Float32Array, width: u32, height: u32) -> (u32, u32) {
+    let mut x_cords_sum: f32 = 0.0;
+    let mut y_cords_sum: f32 = 0.0;
+    let mut num_white_pixels: f32 = 0.0;
+
+    let mut i = 0;
+    while i < width * height {
+        let x_cord = i % width;
+        let y_cord = (i - x_cord) / width;
+
+        let val = data.get_index(i);
+        x_cords_sum += x_cord as f32 * val;
+        y_cords_sum += y_cord as f32 * val;
+
+        if val != 0.0 {
+            num_white_pixels += 1.0;
+        }
+        i += 1;
+    }
+
+    let x_avg = (x_cords_sum / num_white_pixels).floor() as u32;
+    let y_avg = (y_cords_sum / num_white_pixels).floor() as u32;
+
+    (x_avg, y_avg)
 }

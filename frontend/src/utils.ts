@@ -81,7 +81,16 @@ export async function findImageBoundariesJs(
   else return [left, top, right - left, bottom - top];
 }
 
-export function centerImage(
+export async function centerImage(
+  croppedImageData: Float32Array,
+  width: number,
+  height: number
+) {
+  if (imageProcesser.functions === undefined) await imageProcesser.loadWasm();
+  return await imageProcesser.centerImage(croppedImageData, width, height);
+}
+
+export function centerImageJs(
   croppedImageData: Float32Array,
   boundaries: [number, number, number, number]
 ) {
@@ -141,6 +150,20 @@ export function grayScaleImage(data: ImageData) {
     newPixelData[i / 4] = grayScaleVal / 255; //scale between 0 and 1
   }
   return newPixelData;
+}
+
+export async function drawImageBoundaries(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d");
+  if (ctx) {
+    const imageBoundaries = await findImageBoundaries(
+      ctx.getImageData(0, 0, canvas.width, canvas.height),
+      false
+    );
+    console.log(imageBoundaries);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(...imageBoundaries);
+  }
 }
 
 export async function testGrayScaleImage() {

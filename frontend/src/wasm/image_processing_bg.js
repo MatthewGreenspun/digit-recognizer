@@ -116,6 +116,21 @@ export function find_image_boundaries(data, square) {
     }
 }
 
+/**
+* @param {Float32Array} cropped_img_data
+* @param {number} width
+* @param {number} height
+* @returns {Float32Array}
+*/
+export function center_image(cropped_img_data, width, height) {
+    try {
+        var ret = wasm.center_image(addBorrowedObject(cropped_img_data), width, height);
+        return takeObject(ret);
+    } finally {
+        heap[stack_pointer++] = undefined;
+    }
+}
+
 let WASM_VECTOR_LEN = 0;
 
 function passArray8ToWasm0(arg, malloc) {
@@ -237,6 +252,11 @@ export function __wbg_newwithbyteoffsetandlength_43381b9f511c0022(arg0, arg1, ar
 export function __wbg_new_b0bf69327e727def(arg0) {
     var ret = new Float32Array(getObject(arg0));
     return addHeapObject(ret);
+};
+
+export function __wbg_getindex_61b310c2f3f9a610(arg0, arg1) {
+    var ret = getObject(arg0)[arg1 >>> 0];
+    return ret;
 };
 
 export function __wbg_new_59cb74e423758ede() {

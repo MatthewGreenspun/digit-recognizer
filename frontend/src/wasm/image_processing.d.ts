@@ -27,6 +27,13 @@ export function col_is_black(data: ImageData, col: number): boolean;
 /**
 * @param {ImageData} data
 * @param {boolean} square
-* @returns {[number,number,number,number]}
+* @returns {[number, number, number, number]}
 */
-export function find_image_boundaries(data: ImageData, square: boolean): [number,number,number,number];
+export function find_image_boundaries(data: ImageData, square: boolean): [number, number, number, number];
+/**
+* @param {Float32Array} cropped_img_data
+* @param {number} width
+* @param {number} height
+* @returns {Float32Array}
+*/
+export function center_image(cropped_img_data: Float32Array, width: number, height: number): Float32Array;

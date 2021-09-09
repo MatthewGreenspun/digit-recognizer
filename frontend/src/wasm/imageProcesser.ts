@@ -7,6 +7,11 @@ interface ImageProcesserFunctions {
     data: ImageData,
     square: boolean
   ): [number, number, number, number];
+  center_image(
+    cropped_img_data: Float32Array,
+    width: number,
+    height: number
+  ): Float32Array;
 }
 
 interface ImageProcesser {
@@ -20,6 +25,11 @@ interface ImageProcesser {
     data: ImageData,
     square: boolean
   ) => Promise<[number, number, number, number]>;
+  centerImage(
+    croppedImageData: Float32Array,
+    width: number,
+    height: number
+  ): Promise<Float32Array>;
 }
 
 const imageProcesser: ImageProcesser = {
@@ -77,6 +87,21 @@ const imageProcesser: ImageProcesser = {
     else {
       const functions = await this.loadWasm();
       return functions.find_image_boundaries(data, square);
+    }
+  },
+
+  async centerImage(
+    croppedImageData: Float32Array,
+    width: number,
+    height: number
+  ) {
+    if (this.functions !== undefined)
+      return Promise.resolve(
+        this.functions.center_image(croppedImageData, width, height)
+      );
+    else {
+      const functions = await this.loadWasm();
+      return functions.center_image(croppedImageData, width, height);
     }
   },
 };

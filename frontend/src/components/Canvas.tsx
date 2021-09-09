@@ -34,9 +34,10 @@ const Canvas: React.FC<Props> = ({ predict }) => {
       const imageData = ctx.getImageData(0, 0, 28, 28);
       const boundaries = await findImageBoundaries(imageData, false);
       const croppedImageData = ctx.getImageData(...boundaries);
-      const centeredImageData = centerImage(
+      const centeredImageData = await centerImage(
         grayScaleImage(croppedImageData),
-        boundaries
+        boundaries[2],
+        boundaries[3]
       );
       ctx.putImageData(f32ArrToImageData(centeredImageData), 0, 0);
       predict(centeredImageData);
