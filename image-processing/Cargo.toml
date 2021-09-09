@@ -9,3 +9,14 @@ crate-type = ["cdylib"]
 [dependencies]
 wasm-bindgen = "0.2.76"
 image = "0.23.14"
+wasm-bindgen-test = "0.3.26"
+console_error_panic_hook = "0.1.6"
+
+[dependencies.web-sys]
+version = "0.3.53"
+features = [
+	'ImageData'
+]
+
+[dependencies.js-sys]
+version = "0.3.53"
