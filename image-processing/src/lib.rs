@@ -143,7 +143,9 @@ pub fn center_image(cropped_img_data: &js_sys::Float32Array, width: u32, height:
     let mut centered_image_data: [f32; 784] = [0.0; 784];
 
     let mut i = black_rows_above * final_img_width;
-    while i < black_rows_above * final_img_width + height * final_img_width {
+    let end = std::cmp::min(i + height * final_img_width, 784);
+
+    while i < end {
         let x_cord = (i - black_rows_above * final_img_width) % final_img_width;
         let y_cord = (i - x_cord) / final_img_width;
         if black_cols_left <= x_cord && x_cord < black_cols_left + width {
