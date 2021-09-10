@@ -15,10 +15,8 @@ function App() {
       modelRef.current = model;
     }
     tf.tidy(() => {
-      let convertedImage = tf.tensor2d(data, [1, 784]);
-      convertedImage = tf.cast(convertedImage, "float32");
-
-      const modelOutput = model.predict(convertedImage) as tf.Tensor;
+      const tensor = tf.tensor2d(data, [1, 784]);
+      const modelOutput = model.predict(tensor) as tf.Tensor;
       const outputArray = Array.from(modelOutput.dataSync());
       setModelOutput(outputArray);
     });
