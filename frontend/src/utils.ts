@@ -141,7 +141,12 @@ export function f32ArrToImageData(data: Float32Array) {
   return new ImageData(imageData, 28, 28);
 }
 
-export function grayScaleImage(data: ImageData) {
+export async function grayScaleImage(data: ImageData) {
+  if (imageProcesser.functions === undefined) await imageProcesser.loadWasm();
+  return await imageProcesser.grayScaleImage(data);
+}
+
+export function grayScaleImageJs(data: ImageData) {
   const { data: imageData, width, height } = data;
   const newPixelData = new Float32Array(width * height);
   for (let i = 0; i < imageData.length; i += 4) {
