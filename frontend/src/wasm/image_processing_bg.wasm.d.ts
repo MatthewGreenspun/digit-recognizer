@@ -2,6 +2,7 @@
 /* eslint-disable */
 export const memory: WebAssembly.Memory;
 export function multiply(a: number, b: number): number;
+export function process_image(a: number): number;
 export function gray_scale_image(a: number): number;
 export function row_is_black(a: number, b: number): number;
 export function col_is_black(a: number, b: number): number;

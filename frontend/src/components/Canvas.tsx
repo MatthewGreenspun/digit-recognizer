@@ -1,11 +1,7 @@
 import { useEffect, useRef, memo } from "react";
-import {
-  scaleCanvas,
-  grayScaleImage,
-  centerImage,
-  f32ArrToImageData,
-  findImageBoundaries,
-} from "../utils";
+import { scaleCanvas, f32ArrToImageData } from "../utils";
+
+import imageProcesser from "../wasm/imageProcesser";
 
 interface Props {
   predict: (data: Float32Array) => any;
@@ -22,22 +18,8 @@ const Canvas: React.FC<Props> = ({ predict }) => {
     if (ctx && canvas) {
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, 28, 28); //clear old image
-      const imageBoundaries = await findImageBoundaries(
+      const centeredImageData = await imageProcesser.processImage(
         ctx.getImageData(0, 0, canvas.width, canvas.height)
-      );
-      const canvas2 = document.createElement("canvas");
-      const ctx2 = canvas2.getContext("2d") as CanvasRenderingContext2D;
-      canvas2.height = imageBoundaries[3];
-      canvas2.width = imageBoundaries[2];
-      ctx2.putImageData(ctx.getImageData(...imageBoundaries), 0, 0);
-      ctx.drawImage(canvas2, 0, 0, 20, 20); //images can fit in a 20/20 box
-      const imageData = ctx.getImageData(0, 0, 28, 28);
-      const boundaries = await findImageBoundaries(imageData, false);
-      const croppedImageData = ctx.getImageData(...boundaries);
-      const centeredImageData = await centerImage(
-        await grayScaleImage(croppedImageData),
-        boundaries[2],
-        boundaries[3]
       );
       ctx.putImageData(f32ArrToImageData(centeredImageData), 0, 0);
       predict(centeredImageData);

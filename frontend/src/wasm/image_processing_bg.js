@@ -59,6 +59,20 @@ export function multiply(num1, num2) {
 }
 
 /**
+* ## Process Image
+* Performs the entire image transformation in one function.
+*
+* Takes in the image data from the entire canvas and returns the
+* centered image as a Float32Array
+* @param {ImageData} data
+* @returns {Float32Array}
+*/
+export function process_image(data) {
+    var ret = wasm.process_image(addHeapObject(data));
+    return takeObject(ret);
+}
+
+/**
 * @param {ImageData} data
 * @returns {Float32Array}
 */

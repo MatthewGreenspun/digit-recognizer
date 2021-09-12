@@ -8,6 +8,16 @@
 */
 export function multiply(num1: number, num2: number): number;
 /**
+* ## Process Image
+* Performs the entire image transformation in one function. 
+*
+* Takes in the image data from the entire canvas and returns the
+* centered image as a Float32Array
+* @param {ImageData} data
+* @returns {Float32Array}
+*/
+export function process_image(data: ImageData): Float32Array;
+/**
 * @param {ImageData} data
 * @returns {Float32Array}
 */

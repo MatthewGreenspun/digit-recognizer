@@ -12,6 +12,7 @@ interface ImageProcesserFunctions {
     width: number,
     height: number
   ): Float32Array;
+  process_image: (data: ImageData) => Float32Array;
 }
 
 interface ImageProcesser {
@@ -30,6 +31,7 @@ interface ImageProcesser {
     width: number,
     height: number
   ): Promise<Float32Array>;
+  processImage: (data: ImageData) => Promise<Float32Array>;
 }
 
 const imageProcesser: ImageProcesser = {
@@ -102,6 +104,15 @@ const imageProcesser: ImageProcesser = {
     else {
       const functions = await this.loadWasm();
       return functions.center_image(croppedImageData, width, height);
+    }
+  },
+
+  async processImage(data: ImageData) {
+    if (this.functions !== undefined)
+      return Promise.resolve(this.functions.process_image(data));
+    else {
+      const functions = await this.loadWasm();
+      return functions.process_image(data);
     }
   },
 };
